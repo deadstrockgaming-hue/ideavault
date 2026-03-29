@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IdeaVault — Private Innovation Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{50:'#f0f4ff',100:'#e0eaff',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81'},dark:{800:'#1e1b4b',900:'#0f0c29'}},fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0a0a1a;color:#e2e8f0}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#1e1b4b}
+  ::-webkit-scrollbar-thumb{background:#4f46e5;border-radius:3px}
+  .glass{background:rgba(30,27,75,0.6);backdrop-filter:blur(16px);border:1px solid rgba(99,102,241,0.2)}
+  .glass-dark{background:rgba(15,12,41,0.8);backdrop-filter:blur(20px);border:1px solid rgba(99,102,241,0.15)}
+  .glow{box-shadow:0 0 30px rgba(99,102,241,0.3)}
+  .glow-sm{box-shadow:0 0 15px rgba(99,102,241,0.2)}
+  .gradient-text{background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .bg-gradient-main{background:radial-gradient(ellipse at top left,#1e1b4b 0%,#0a0a1a 50%,#0f0c29 100%)}
+  .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:white;font-weight:600;transition:all .2s}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(99,102,241,0.4)}
+  .btn-secondary{background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;font-weight:500;transition:all .2s}
+  .btn-secondary:hover{background:rgba(99,102,241,0.25);border-color:rgba(99,102,241,0.5)}
+  .input-field{background:rgba(15,12,41,0.7);border:1px solid rgba(99,102,241,0.25);color:#e2e8f0;outline:none;transition:all .2s}
+  .input-field:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+  .input-field::placeholder{color:#4b5563}
+  .tag{background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;font-size:0.7rem;padding:2px 8px;border-radius:999px}
+  .pulse-dot{width:8px;height:8px;background:#10b981;border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}}
+  .slide-in{animation:slideIn .3s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .chat-bubble-self{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:18px 18px 4px 18px}
+  .chat-bubble-other{background:rgba(30,27,75,0.8);border:1px solid rgba(99,102,241,0.2);border-radius:18px 18px 18px 4px}
+  .idea-card{transition:all .2s}
+  .idea-card:hover{transform:translateY(-2px);border-color:rgba(99,102,241,0.5)!important}
+  .nav-item{transition:all .2s;cursor:pointer}
+  .nav-item.active{background:linear-gradient(135deg,rgba(79,70,229,0.3),rgba(124,58,237,0.3));border:1px solid rgba(99,102,241,0.4)}
+  .status-new{color:#10b981;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3)}
+  .status-exists{color:#f59e0b;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3)}
+  .status-pending{color:#6366f1;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3)}
+  .paper-card{background:rgba(15,12,41,0.5);border:1px solid rgba(99,102,241,0.15);transition:all .2s}
+  .paper-card:hover{border-color:rgba(99,102,241,0.4);background:rgba(30,27,75,0.4)}
+  .admin-badge{background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;font-size:0.65rem;padding:2px 6px;border-radius:4px;font-weight:700}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center}
+  .progress-bar{background:linear-gradient(90deg,#4f46e5,#c084fc);animation:progress 3s ease-in-out forwards}
+  @keyframes progress{from{width:0}to{width:100%}}
+  .login-tab{transition:all .2s;cursor:pointer;padding:10px 20px;border-radius:12px;font-size:0.875rem;font-weight:500;color:#94a3b8;border:1px solid transparent}
+  .login-tab.active{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;box-shadow:0 4px 15px rgba(99,102,241,0.35)}
+  .option-card{background:rgba(15,12,41,0.6);border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:20px;cursor:pointer;transition:all .25s;text-align:center}
+  .option-card:hover{border-color:rgba(99,102,241,0.5);background:rgba(30,27,75,0.5);transform:translateY(-2px)}
+  .option-card.selected{border-color:#6366f1;background:rgba(99,102,241,0.15);box-shadow:0 0 20px rgba(99,102,241,0.2)}
+</style>
+</head>
+<body class="bg-gradient-main min-h-screen">
+<div id="app"></div>
+<script>
+// ─── DB ────────────────────────────────────────────────────────────────────────
+const DB={
+  get(k,d=null){try{return JSON.parse(localStorage.getItem('iv_'+k))||d}catch{return d}},
+  set(k,v){localStorage.setItem('iv_'+k,JSON.stringify(v))},
+  clear(k){localStorage.removeItem('iv_'+k)}
+};
+
+// ─── SEED ──────────────────────────────────────────────────────────────────────
+function seedData(){
+  // Always ensure the one true admin code exists — never overwrite existing codes
+  const codes=DB.get('codes',[]);
+  if(!codes.find(c=>c.email==='abhisheakrnair121@gmail.com')){
+    codes.push({code:'ADMIN-ABHISHEAK-2024',email:'abhisheakrnair121@gmail.com',used:false,role:'admin'});
+    DB.set('codes',codes);
+  }
+  if(!DB.get('seeded')){
+    DB.set('ideas',[
+      {id:'idea_1',title:'AI-Powered Code Review System',author:'abhisheakrnair121@gmail.com',authorName:'Abhisheak',date:'2024-01-15',status:'analyzed',isNew:false,description:'A system that uses ML to automatically review code and suggest improvements.',
+       analysis:{verdict:'exists',summary:'Similar tools like DeepCode, SonarQube, and GitHub Copilot already cover this space.',
+       existingLinks:[{title:'DeepCode - AI Code Review',url:'https://snyk.io/platform/deepcode-ai/',desc:"Snyk's AI-powered code analysis"},{title:'SonarQube',url:'https://www.sonarqube.org',desc:'Continuous code quality inspection'},{title:'GitHub Copilot',url:'https://github.com/features/copilot',desc:'AI pair programmer'}],
+       papers:[{title:'Automated Code Review Using Deep Learning',authors:'Zhang et al.',year:2023,url:'https://scholar.google.com',source:'IEEE'},{title:'LLM-based Static Analysis',authors:'Johnson & Kumar',year:2024,url:'https://scholar.google.com',source:'ACM'}]}},
+      {id:'idea_2',title:'Quantum-Secured Blockchain Voting',author:'abhisheakrnair121@gmail.com',authorName:'Abhisheak',date:'2024-01-20',status:'analyzed',isNew:true,description:'Using quantum key distribution to secure blockchain-based democratic voting systems.',
+       analysis:{verdict:'new',summary:'No existing solution combines quantum cryptography with blockchain voting at this level of integration.',
+       howItWorks:['Use QKD to establish tamper-proof communication channels','Deploy smart contracts for transparent vote recording','Implement zero-knowledge proofs for voter privacy','Use quantum random number generation for key ceremony'],
+       papers:[{title:'Quantum Cryptography in Distributed Systems',authors:'Chen, Li & Park',year:2024,url:'https://scholar.google.com/scholar?q=quantum+cryptography+blockchain',source:'Google Scholar'},{title:'Secure Electronic Voting: A Survey',authors:'Adida et al.',year:2023,url:'https://scholar.google.com/scholar?q=secure+electronic+voting',source:'arXiv'},{title:'Zero-Knowledge Proofs for Voting Systems',authors:'Groth & Sahai',year:2023,url:'https://scholar.google.com/scholar?q=zero+knowledge+proofs+voting',source:'IACR'}]}}
+    ]);
+    DB.set('groups',[]);
+    DB.set('seeded',true);
+  }
+}
+seedData();
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+let state={view:'login',loginTab:'signin',collabMode:null,user:DB.get('user'),modal:null,activeGroup:null,activeIdea:null,adminTab:'codes',ideasTab:'all'};
+
+// ─── ROUTER ────────────────────────────────────────────────────────────────────
+function render(){
+  if(!state.user){renderLogin();}
+  else if(state.view==='admin'&&state.user.role==='admin'){renderAdmin();}
+  else if(state.view==='idea'){renderIdeaDetail();}
+  else if(state.view==='group'){renderGroupChat();}
+  else{renderDashboard();}
+  if(state.modal)renderModal();
+}
+
+// ─── LOGIN ─────────────────────────────────────────────────────────────────────
+function renderLogin(){
+  document.getElementById('app').innerHTML=`
+  <div class="min-h-screen flex items-center justify-center p-4 bg-gradient-main relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-96 h-96 bg-brand-700 opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-700 opacity-10 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
+    <div class="w-full max-w-md slide-in">
+
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl glow mb-4" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <h1 class="text-3xl font-bold gradient-text">IdeaVault</h1>
+        <p class="text-slate-400 mt-1 text-sm">Private Innovation Platform</p>
+        <div class="flex items-center justify-center gap-1 mt-2">
+          <div class="pulse-dot"></div>
+          <span class="text-xs text-emerald-400">Invite-only access</span>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="flex gap-2 mb-4 p-1 rounded-xl" style="background:rgba(15,12,41,0.6);border:1px solid rgba(99,102,241,0.15)">
+        <button onclick="switchLoginTab('signin')" class="login-tab flex-1 ${state.loginTab==='signin'?'active':''}">🔑 Sign In</button>
+        <button onclick="switchLoginTab('collab')" class="login-tab flex-1 ${state.loginTab==='collab'?'active':''}">🤝 Collaborate</button>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div class="glass rounded-2xl p-8 glow-sm ${state.loginTab==='signin'?'':'hidden'}" id="panel-signin">
+        <h2 class="text-xl font-semibold text-white mb-1">Welcome back</h2>
+        <p class="text-slate-400 text-sm mb-6">Enter your email and invite code to access the vault.</p>
+        <div id="login-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"></div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Email Address</label>
+            <input id="login-email" type="email" placeholder="you@example.com" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="if(event.key==='Enter')doLogin()"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Invite Code</label>
+            <input id="login-code" type="text" placeholder="VAULT-XXXX-XXXX" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono uppercase" onkeydown="if(event.key==='Enter')doLogin()"/>
+          </div>
+          <button onclick="doLogin()" class="btn-primary w-full py-3 rounded-xl text-sm">Enter IdeaVault →</button>
+        </div>
+        <p class="text-xs text-slate-600 text-center mt-5">No invite code? Switch to the <span class="text-brand-400 cursor-pointer" onclick="switchLoginTab('collab')">Collaborate tab</span> to join or start a session.</p>
+      </div>
+
+      <!-- COLLABORATE PANEL -->
+      <div class="glass rounded-2xl p-8 glow-sm ${state.loginTab==='collab'?'':'hidden'}" id="panel-collab">
+        <h2 class="text-xl font-semibold text-white mb-1">Collaborate</h2>
+        <p class="text-slate-400 text-sm mb-6">Start a private group session or join one with a code — no invite needed.</p>
+
+        <!-- Two option cards -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="option-card ${state.collabMode==='create'?'selected':''}" id="opt-create" onclick="setCollabMode('create')">
+            <div class="text-3xl mb-2">🚀</div>
+            <p class="text-sm font-semibold text-white">Create Group</p>
+            <p class="text-xs text-slate-500 mt-1">Start a private collaboration session</p>
+          </div>
+          <div class="option-card ${state.collabMode==='join'?'selected':''}" id="opt-join" onclick="setCollabMode('join')">
+            <div class="text-3xl mb-2">🔗</div>
+            <p class="text-sm font-semibold text-white">Join Group</p>
+            <p class="text-xs text-slate-500 mt-1">Enter a code to join existing group</p>
+          </div>
+        </div>
+
+        <div id="collab-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"></div>
+
+        <!-- Default hint -->
+        <div id="collab-default" class="${!state.collabMode?'text-center py-2':'hidden'}">
+          <p class="text-slate-500 text-sm">Choose an option above to get started.</p>
+        </div>
+
+        <!-- Create form -->
+        <div id="collab-create" class="${state.collabMode==='create'?'space-y-4':'hidden'}">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Your Name</label>
+            <input id="guest-name" placeholder="e.g. Alex" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="if(event.key==='Enter')guestCreateGroup()"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Group Name</label>
+            <input id="guest-grp-name" placeholder="e.g. 🚀 Innovation Hub" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="if(event.key==='Enter')guestCreateGroup()"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Description <span class="normal-case text-slate-600">(optional)</span></label>
+            <input id="guest-grp-desc" placeholder="What will you brainstorm?" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="if(event.key==='Enter')guestCreateGroup()"/>
+          </div>
+          <button onclick="guestCreateGroup()" class="btn-primary w-full py-3 rounded-xl text-sm">🚀 Create Private Group Session</button>
+        </div>
+
+        <!-- Join form -->
+        <div id="collab-join" class="${state.collabMode==='join'?'space-y-4':'hidden'}">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Your Name</label>
+            <input id="join-name" placeholder="e.g. Alex" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="if(event.key==='Enter')guestJoinGroup()"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Group Join Code</label>
+            <input id="join-code" placeholder="GRP-XXXXXX" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono uppercase" onkeydown="if(event.key==='Enter')guestJoinGroup()"/>
+          </div>
+          <button onclick="guestJoinGroup()" class="btn-primary w-full py-3 rounded-xl text-sm">🔗 Join Group Session</button>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function switchLoginTab(tab){
+  state.loginTab=tab;
+  render();
+}
+
+function setCollabMode(mode){
+  state.collabMode=mode;
+  document.getElementById('collab-default').className='hidden';
+  document.getElementById('collab-create').className=(mode==='create'?'space-y-4':'hidden');
+  document.getElementById('collab-join').className=(mode==='join'?'space-y-4':'hidden');
+  document.getElementById('opt-create').classList.toggle('selected',mode==='create');
+  document.getElementById('opt-join').classList.toggle('selected',mode==='join');
+}
+
+function doLogin(){
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  const code=document.getElementById('login-code').value.trim().toUpperCase();
+  const codes=DB.get('codes',[]);
+  const match=codes.find(c=>c.code===code&&c.email.toLowerCase()===email);
+  if(!match){
+    const err=document.getElementById('login-error');
+    err.textContent='Invalid email or invite code. Please check and try again.';
+    err.classList.remove('hidden');
+    return;
+  }
+  const user={email,role:match.role,name:email.split('@')[0].charAt(0).toUpperCase()+email.split('@')[0].slice(1),isGuest:false};
+  DB.set('user',user);
+  state.user=user;
+  state.view='dashboard';
+  render();
+}
+
+function guestCreateGroup(){
+  const name=(document.getElementById('guest-name').value||'').trim();
+  const grpName=(document.getElementById('guest-grp-name').value||'').trim();
+  const grpDesc=(document.getElementById('guest-grp-desc').value||'').trim();
+  const err=document.getElementById('collab-error');
+  if(!name||!grpName){err.textContent='Please enter your name and a group name.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const guestEmail='guest_'+Date.now()+'@collab.local';
+  const user={email:guestEmail,role:'guest',name,isGuest:true};
+  DB.set('user',user);
+  state.user=user;
+  const joinCode='GRP-'+Math.random().toString(36).substr(2,6).toUpperCase();
+  const groups=DB.get('groups',[]);
+  const newGroup={
+    id:'grp_'+Date.now(),name:grpName,description:grpDesc||'Private collaboration session',
+    members:[guestEmail],memberNames:{[guestEmail]:name},ideas:[],joinCode,
+    messages:[{id:'m'+Date.now(),author:'system',name:'IdeaVault',
+      text:'Welcome to "'+grpName+'"! 🎉 Share the group code 🔑 '+joinCode+' with others so they can join via the Collaborate tab.',
+      time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),date:'Today'}]
+  };
+  groups.push(newGroup);
+  DB.set('groups',groups);
+  state.view='group';state.activeGroup=newGroup.id;
+  render();
+}
+
+function guestJoinGroup(){
+  const name=(document.getElementById('join-name').value||'').trim();
+  const code=(document.getElementById('join-code').value||'').trim().toUpperCase();
+  const err=document.getElementById('collab-error');
+  if(!name||!code){err.textContent='Please enter your name and a group code.';err.classList.remove('hidden');return;}
+  const groups=DB.get('groups',[]);
+  const group=groups.find(g=>g.joinCode===code);
+  if(!group){err.textContent='Group code not found. Please check and try again.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const guestEmail='guest_'+Date.now()+'@collab.local';
+  const user={email:guestEmail,role:'guest',name,isGuest:true};
+  DB.set('user',user);
+  state.user=user;
+  group.members.push(guestEmail);
+  group.memberNames=group.memberNames||{};
+  group.memberNames[guestEmail]=name;
+  group.messages.push({id:'m'+Date.now(),author:'system',name:'IdeaVault',text:name+' has joined the group! 👋',time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),date:'Today'});
+  DB.set('groups',groups);
+  state.view='group';state.activeGroup=group.id;
+  render();
+}
+
+// ─── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const ideas=DB.get('ideas',[]);
+  const groups=DB.get('groups',[]);
+  const myGroups=groups.filter(g=>g.members.includes(state.user.email));
+  const myIdeas=ideas.filter(i=>i.author===state.user.email);
+  const allIdeas=state.ideasTab==='mine'?myIdeas:ideas;
+  document.getElementById('app').innerHTML=`
+  <div class="flex min-h-screen">
+    ${renderSidebar()}
+    <div class="flex-1 overflow-auto">
+      <div class="glass-dark border-b border-brand-800/30 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div><h2 class="font-semibold text-white">Dashboard</h2><p class="text-xs text-slate-500">Welcome back, ${state.user.name} 👋</p></div>
+        <div class="flex items-center gap-3">
+          ${state.user.role==='admin'?`<button onclick="state.view='admin';render()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin</button>`:''}
+          <button onclick="openSubmitModal()" class="btn-primary px-4 py-1.5 rounded-lg text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>New Idea
+          </button>
+        </div>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          ${[{label:'Total Ideas',val:ideas.length,icon:'💡'},{label:'New Ideas',val:ideas.filter(i=>i.isNew).length,icon:'✨'},{label:'My Ideas',val:myIdeas.length,icon:'🧠'},{label:'My Groups',val:myGroups.length,icon:'👥'}].map(s=>`<div class="glass rounded-xl p-4 glow-sm"><div class="text-2xl mb-2">${s.icon}</div><div class="text-2xl font-bold text-white">${s.val}</div><div class="text-xs text-slate-400 mt-0.5">${s.label}</div></div>`).join('')}
+        </div>
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-white">Ideas</h3>
+            <div class="flex gap-2">
+              <button onclick="state.ideasTab='all';render()" class="text-xs px-3 py-1 rounded-lg ${state.ideasTab==='all'?'btn-primary':'btn-secondary'}">All Ideas</button>
+              <button onclick="state.ideasTab='mine';render()" class="text-xs px-3 py-1 rounded-lg ${state.ideasTab==='mine'?'btn-primary':'btn-secondary'}">My Ideas</button>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            ${allIdeas.map(i=>renderIdeaCard(i)).join('')}
+            <div onclick="openSubmitModal()" class="glass rounded-xl p-6 border-dashed border-2 border-brand-800/40 flex flex-col items-center justify-center cursor-pointer hover:border-brand-600/50 transition-all group min-h-[140px]">
+              <div class="w-10 h-10 rounded-xl bg-brand-900/50 flex items-center justify-center mb-3 group-hover:bg-brand-800/50 transition-all"><svg class="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+              <p class="text-sm text-slate-400 group-hover:text-slate-300">Submit a new idea</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-white">My Collaboration Groups</h3>
+            <button onclick="openGroupModal()" class="btn-secondary text-xs px-3 py-1.5 rounded-lg">+ Create Group</button>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            ${myGroups.map(g=>renderGroupCard(g)).join('')}
+            ${myGroups.length===0?`<div class="glass rounded-xl p-6 col-span-2 text-center text-slate-500 text-sm">No groups yet. Create one to start collaborating!</div>`:''}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderIdeaCard(idea){
+  const badge=idea.status==='pending'?`<span class="tag status-pending">Analyzing...</span>`:idea.isNew?`<span class="tag status-new">✨ Novel Idea</span>`:`<span class="tag status-exists">⚠ Already Exists</span>`;
+  return `<div onclick="viewIdea('${idea.id}')" class="glass rounded-xl p-5 cursor-pointer idea-card border border-brand-800/20">
+    <div class="flex items-start justify-between mb-3"><div class="flex-1"><h4 class="font-medium text-white text-sm leading-snug mb-1">${idea.title}</h4><p class="text-xs text-slate-500">${idea.authorName} · ${idea.date}</p></div>${badge}</div>
+    <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">${idea.description}</p>
+  </div>`;
+}
+
+function renderGroupCard(g){
+  return `<div onclick="viewGroup('${g.id}')" class="glass rounded-xl p-5 cursor-pointer idea-card border border-brand-800/20">
+    <div class="flex items-start justify-between mb-2"><h4 class="font-medium text-white text-sm">${g.name}</h4><span class="tag">${g.members.length} members</span></div>
+    <p class="text-xs text-slate-400 mb-3">${g.description}</p>
+    <div class="flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg><span class="text-xs text-slate-500">${g.messages.length} messages</span></div>
+      ${g.joinCode?`<span class="tag text-emerald-400" style="border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.1)">🔑 ${g.joinCode}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ─── SIDEBAR ───────────────────────────────────────────────────────────────────
+function renderSidebar(){
+  const groups=DB.get('groups',[]).filter(g=>g.members.includes(state.user.email));
+  return `
+  <div class="w-64 glass-dark border-r border-brand-800/30 flex flex-col min-h-screen sticky top-0 h-screen overflow-y-auto">
+    <div class="p-5 border-b border-brand-800/20">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+        <div><p class="font-bold text-sm text-white">IdeaVault</p><p class="text-xs text-slate-500">Private Platform</p></div>
+      </div>
+    </div>
+    <div class="px-4 py-3 mx-3 my-3 rounded-xl" style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2)">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm text-white" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${state.user.name[0]}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-white truncate">${state.user.name}</p>
+          <p class="text-xs text-slate-500 truncate">${state.user.isGuest?'Guest Session':state.user.email}</p>
+        </div>
+        ${state.user.role==='admin'?`<span class="admin-badge">ADMIN</span>`:''}
+        ${state.user.isGuest?`<span class="tag" style="color:#10b981;border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.1);font-size:0.6rem">GUEST</span>`:''}
+      </div>
+    </div>
+    <nav class="px-3 flex-1">
+      ${!state.user.isGuest?`
+      <div onclick="state.view='dashboard';render()" class="nav-item ${state.view==='dashboard'?'active':''} flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-sm text-slate-300 hover:text-white">
+        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard
+      </div>
+      <div onclick="openSubmitModal()" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-sm text-slate-300 hover:text-white">
+        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Submit Idea
+      </div>`:''}
+      ${state.user.role==='admin'?`
+      <div onclick="state.view='admin';render()" class="nav-item ${state.view==='admin'?'active':''} flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-sm text-yellow-400 hover:text-yellow-300">
+        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin Panel
+      </div>`:''}
+      <p class="text-xs text-slate-600 uppercase tracking-wider px-3 pt-4 pb-2 font-medium">Groups</p>
+      ${groups.map(g=>`
+      <div onclick="viewGroup('${g.id}')" class="nav-item ${state.activeGroup===g.id&&state.view==='group'?'active':''} flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-sm text-slate-300 hover:text-white">
+        <span class="text-base">${g.name.split(' ')[0]}</span><span class="truncate">${g.name.split(' ').slice(1).join(' ')}</span>
+      </div>`).join('')}
+      <div onclick="openGroupModal()" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-sm text-slate-500 hover:text-slate-300">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>New Group
+      </div>
+    </nav>
+    <div class="p-3 border-t border-brand-800/20">
+      <button onclick="doLogout()" class="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        ${state.user.isGuest?'Leave Session':'Sign out'}
+      </button>
+    </div>
+  </div>`;
+}
+
+// ─── IDEA DETAIL ───────────────────────────────────────────────────────────────
+function viewIdea(id){state.activeIdea=id;state.view='idea';render();}
+
+function renderIdeaDetail(){
+  const ideas=DB.get('ideas',[]);
+  const idea=ideas.find(i=>i.id===state.activeIdea);
+  if(!idea){state.view='dashboard';render();return;}
+  const a=idea.analysis;
+  document.getElementById('app').innerHTML=`
+  <div class="flex min-h-screen">
+    ${renderSidebar()}
+    <div class="flex-1 overflow-auto">
+      <div class="glass-dark border-b border-brand-800/30 px-8 py-4 flex items-center gap-3 sticky top-0 z-10">
+        <button onclick="state.view='dashboard';render()" class="text-slate-400 hover:text-white transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+        <div class="flex-1"><h2 class="font-semibold text-white text-sm">${idea.title}</h2><p class="text-xs text-slate-500">${idea.authorName} · ${idea.date}</p></div>
+        ${idea.isNew?`<span class="tag status-new text-sm px-3 py-1">✨ Novel Idea</span>`:`<span class="tag status-exists text-sm px-3 py-1">⚠ Already Exists</span>`}
+      </div>
+      <div class="p-8 max-w-4xl">
+        <div class="glass rounded-xl p-6 mb-6">
+          <h3 class="text-xs text-slate-400 uppercase tracking-wider font-medium mb-2">Original Idea</h3>
+          <p class="text-slate-200 leading-relaxed">${idea.description}</p>
+        </div>
+        <div class="glass rounded-xl p-6 mb-6 border border-brand-600/20">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+            <div><h3 class="font-semibold text-white text-sm">AI Analysis</h3><p class="text-xs text-slate-500">Powered by IdeaVault Intelligence</p></div>
+          </div>
+          <div class="p-4 rounded-lg ${idea.isNew?'bg-emerald-900/20 border border-emerald-800/30':'bg-amber-900/20 border border-amber-800/30'} mb-4">
+            <p class="text-sm font-medium ${idea.isNew?'text-emerald-300':'text-amber-300'} mb-1">${idea.isNew?'🎉 This appears to be a novel idea!':'⚠️ Similar solutions already exist'}</p>
+            <p class="text-sm ${idea.isNew?'text-emerald-400':'text-amber-400'} leading-relaxed">${a.summary}</p>
+          </div>
+          ${!idea.isNew&&a.existingLinks?`<div><h4 class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Existing Solutions</h4><div class="space-y-2">${a.existingLinks.map(l=>`<a href="${l.url}" target="_blank" class="paper-card flex items-start gap-3 p-3 rounded-lg block hover:no-underline"><div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.2)"><svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></div><div><p class="text-sm font-medium text-brand-300 hover:text-brand-200">${l.title}</p><p class="text-xs text-slate-500 mt-0.5">${l.desc}</p></div></a>`).join('')}</div></div>`:''}
+          ${idea.isNew&&a.howItWorks?`<div class="mb-4"><h4 class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">How It Could Work</h4><div class="space-y-2">${a.howItWorks.map((step,i)=>`<div class="flex items-start gap-3"><span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${i+1}</span><p class="text-sm text-slate-300 pt-0.5">${step}</p></div>`).join('')}</div></div>`:''}
+        </div>
+        <div class="glass rounded-xl p-6 mb-6">
+          <div class="flex items-center gap-2 mb-4">
+            <svg class="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <h3 class="font-semibold text-white text-sm">Related Research Papers</h3>
+          </div>
+          <div class="space-y-3">${a.papers.map(p=>`<a href="${p.url}" target="_blank" class="paper-card flex items-start gap-3 p-4 rounded-xl block"><div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(124,58,237,0.2)"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="flex-1"><p class="text-sm font-medium text-white hover:text-brand-300 transition-colors">${p.title}</p><p class="text-xs text-slate-500 mt-0.5">${p.authors} · ${p.year}</p><span class="tag mt-2 inline-block">${p.source}</span></div></a>`).join('')}</div>
+        </div>
+        <div class="flex gap-3 flex-wrap">
+          <button onclick="openGroupModal('${idea.id}')" class="btn-primary px-5 py-2.5 rounded-xl text-sm flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Collaborate on this Idea</button>
+          <button onclick="state.view='dashboard';render()" class="btn-secondary px-5 py-2.5 rounded-xl text-sm">← Back</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── GROUP CHAT ────────────────────────────────────────────────────────────────
+function viewGroup(id){state.activeGroup=id;state.view='group';render();setTimeout(()=>{const el=document.getElementById('chat-messages');if(el)el.scrollTop=el.scrollHeight;},50);}
+
+function renderGroupChat(){
+  const groups=DB.get('groups',[]);
+  const group=groups.find(g=>g.id===state.activeGroup);
+  if(!group){state.view='dashboard';render();return;}
+  document.getElementById('app').innerHTML=`
+  <div class="flex min-h-screen">
+    ${renderSidebar()}
+    <div class="flex-1 flex flex-col" style="max-height:100vh">
+      <div class="glass-dark border-b border-brand-800/30 px-6 py-4 flex items-center gap-4">
+        <button onclick="state.view='dashboard';render()" class="text-slate-400 hover:text-white transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+        <div class="flex-1"><h2 class="font-semibold text-white">${group.name}</h2><p class="text-xs text-slate-500">${group.members.length} members · ${group.description}</p></div>
+        <div class="flex -space-x-2">
+          ${group.members.slice(0,4).map(m=>`<div class="w-8 h-8 rounded-full border-2 border-dark-900 flex items-center justify-center text-xs font-bold text-white" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${(group.memberNames&&group.memberNames[m]?group.memberNames[m]:m)[0].toUpperCase()}</div>`).join('')}
+        </div>
+        ${group.joinCode?`<button onclick="copyJoinCode('${group.joinCode}')" id="copy-code-btn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">🔑 ${group.joinCode}</button>`:''}
+        <button onclick="openAddMemberModal('${group.id}')" class="btn-secondary text-xs px-3 py-1.5 rounded-lg">+ Member</button>
+      </div>
+      ${group.ideas.length?`<div class="px-6 py-3 border-b border-brand-800/20 flex items-center gap-3 overflow-x-auto"><span class="text-xs text-slate-500 whitespace-nowrap">Linked ideas:</span>${group.ideas.map(ideaId=>{const ideas=DB.get('ideas',[]);const idea=ideas.find(i=>i.id===ideaId);return idea?`<button onclick="viewIdea('${idea.id}')" class="tag whitespace-nowrap hover:bg-brand-700/30 transition-all cursor-pointer">💡 ${idea.title}</button>`:''}).join('')}</div>`:''}
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+        ${group.messages.map(m=>renderChatMessage(m)).join('')}
+      </div>
+      <div class="glass-dark border-t border-brand-800/30 p-4">
+        <div class="flex items-end gap-3">
+          <div class="flex-1"><textarea id="chat-input" placeholder="Share your thoughts..." rows="1" class="input-field w-full px-4 py-3 rounded-xl text-sm resize-none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage('${group.id}')}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea></div>
+          <button onclick="sendMessage('${group.id}')" class="btn-primary w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
+        </div>
+        <p class="text-xs text-slate-600 mt-2 text-center">Messages are private and end-to-end encrypted within your group</p>
+      </div>
+    </div>
+  </div>`;
+  setTimeout(()=>{const el=document.getElementById('chat-messages');if(el)el.scrollTop=el.scrollHeight;},50);
+}
+
+function copyJoinCode(code){
+  navigator.clipboard.writeText(code).then(()=>{
+    const btn=document.getElementById('copy-code-btn');
+    if(btn){const orig=btn.innerHTML;btn.innerHTML='✅ Copied!';setTimeout(()=>{btn.innerHTML=orig;},2000);}
+  }).catch(()=>alert('Group code: '+code));
+}
+
+function renderChatMessage(m){
+  const isSelf=m.author===state.user.email;
+  if(isSelf)return `<div class="flex justify-end slide-in"><div class="max-w-xs md:max-w-md"><div class="chat-bubble-self px-4 py-3 text-sm text-white">${m.text}</div><p class="text-right text-xs text-slate-600 mt-1">${m.time}</p></div></div>`;
+  return `<div class="flex gap-3 slide-in"><div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${m.name[0]}</div><div class="max-w-xs md:max-w-md"><p class="text-xs text-slate-500 mb-1">${m.name}</p><div class="chat-bubble-other px-4 py-3 text-sm text-slate-200">${m.text}</div><p class="text-xs text-slate-600 mt-1">${m.time}</p></div></div>`;
+}
+
+function sendMessage(groupId){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const groups=DB.get('groups',[]);
+  const group=groups.find(g=>g.id===groupId);
+  const now=new Date();
+  const time=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  group.messages.push({id:'m'+Date.now(),author:state.user.email,name:state.user.name,text,time,date:'Today'});
+  DB.set('groups',groups);
+  input.value='';input.style.height='auto';
+  const msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');
+  div.innerHTML=renderChatMessage({author:state.user.email,name:state.user.name,text,time,date:'Today'});
+  msgs.appendChild(div.firstElementChild);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ─── ADMIN ─────────────────────────────────────────────────────────────────────
+function renderAdmin(){
+  const codes=DB.get('codes',[]);
+  const ideas=DB.get('ideas',[]);
+  document.getElementById('app').innerHTML=`
+  <div class="flex min-h-screen">
+    ${renderSidebar()}
+    <div class="flex-1 overflow-auto">
+      <div class="glass-dark border-b border-brand-800/30 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div><h2 class="font-semibold text-white flex items-center gap-2">Admin Panel <span class="admin-badge">ADMIN</span></h2><p class="text-xs text-slate-500">Manage access, codes, and platform settings</p></div>
+        <button onclick="state.view='dashboard';render()" class="btn-secondary text-xs px-3 py-1.5 rounded-lg">← Dashboard</button>
+      </div>
+      <div class="p-8">
+        <div class="flex gap-2 mb-6">
+          ${['codes','ideas','users'].map(t=>`<button onclick="state.adminTab='${t}';render()" class="text-sm px-4 py-2 rounded-xl ${state.adminTab===t?'btn-primary':'btn-secondary'}">${{codes:'🔑 Invite Codes',ideas:'💡 All Ideas',users:'👥 Users'}[t]}</button>`).join('')}
+        </div>
+        ${state.adminTab==='codes'?renderAdminCodes(codes):''}
+        ${state.adminTab==='ideas'?renderAdminIdeas(ideas):''}
+        ${state.adminTab==='users'?renderAdminUsers(codes):''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminCodes(codes){
+  return `<div>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-white">Invite Codes</h3>
+      <button onclick="generateCode()" class="btn-primary text-sm px-4 py-2 rounded-xl">+ Generate Code</button>
+    </div>
+    <div class="glass rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-brand-800/30">
+          <th class="text-left px-5 py-3 text-xs text-slate-400 font-medium uppercase tracking-wider">Code</th>
+          <th class="text-left px-5 py-3 text-xs text-slate-400 font-medium uppercase tracking-wider">Email</th>
+          <th class="text-left px-5 py-3 text-xs text-slate-400 font-medium uppercase tracking-wider">Role</th>
+          <th class="text-left px-5 py-3 text-xs text-slate-400 font-medium uppercase tracking-wider">Status</th>
+          <th class="text-left px-5 py-3 text-xs text-slate-400 font-medium uppercase tracking-wider">Actions</th>
+        </tr></thead>
+        <tbody>${codes.map((c,i)=>`<tr class="${i%2===0?'bg-white/[0.01]':''} hover:bg-white/[0.03] transition-colors">
+          <td class="px-5 py-3 font-mono text-brand-300 text-xs">${c.code}</td>
+          <td class="px-5 py-3 text-slate-300 text-xs">${c.email}</td>
+          <td class="px-5 py-3"><span class="tag ${c.role==='admin'?'text-yellow-400 border-yellow-600/30 bg-yellow-900/20':''}">${c.role}</span></td>
+          <td class="px-5 py-3"><span class="tag ${c.used?'text-slate-500':'status-new'}">${c.used?'Used':'Active'}</span></td>
+          <td class="px-5 py-3"><div class="flex gap-2">
+            <button onclick="showCodeShare('${c.email}','${c.code}')" class="text-xs btn-secondary px-2 py-1 rounded-lg">📋 Share</button>
+            <button onclick="revokeCode('${c.code}')" class="text-xs px-2 py-1 rounded-lg text-red-400 bg-red-900/20 border border-red-800/30 hover:bg-red-900/40">Revoke</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderAdminIdeas(ideas){
+  return `<div>
+    <h3 class="font-semibold text-white mb-4">All Submitted Ideas</h3>
+    <div class="space-y-3">
+      ${ideas.length===0?`<div class="glass rounded-xl p-6 text-center text-slate-500 text-sm">No ideas yet.</div>`:''}
+      ${ideas.map(i=>`<div class="glass rounded-xl p-4 flex items-center justify-between">
+        <div class="flex-1 min-w-0"><p class="font-medium text-white text-sm">${i.title}</p><p class="text-xs text-slate-500 mt-0.5">${i.authorName} · ${i.date}</p></div>
+        <div class="flex items-center gap-3 ml-4">${i.isNew?`<span class="tag status-new">Novel</span>`:`<span class="tag status-exists">Exists</span>`}
+          <button onclick="viewIdea('${i.id}')" class="text-xs btn-secondary px-3 py-1 rounded-lg">View</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderAdminUsers(codes){
+  return `<div>
+    <h3 class="font-semibold text-white mb-4">Registered Users (${codes.length})</h3>
+    <div class="grid md:grid-cols-2 gap-3">
+      ${codes.map(c=>`<div class="glass rounded-xl p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${c.email[0].toUpperCase()}</div>
+        <div class="flex-1 min-w-0"><p class="text-sm font-medium text-white truncate">${c.email}</p><p class="text-xs text-slate-500">Role: ${c.role} · <span class="font-mono text-brand-400">${c.code}</span></p></div>
+        ${c.role==='admin'?'<span class="admin-badge">ADMIN</span>':''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── MODALS ────────────────────────────────────────────────────────────────────
+function openSubmitModal(){state.modal='submit';render();}
+function openGroupModal(ideaId=null){state.modal={type:'group',ideaId};render();}
+function openAddMemberModal(groupId){state.modal={type:'addmember',groupId};render();}
+
+function renderModal(){
+  const m=state.modal;
+  if(!m)return;
+  let content='';
+  if(m==='submit'||m?.type==='submit'){content=renderSubmitModal();}
+  else if(m?.type==='group'){content=renderGroupModal(m.ideaId);}
+  else if(m?.type==='addmember'){content=renderAddMemberModal(m.groupId);}
+  else if(m?.type==='share'){content=renderShareModal(m.email,m.code);}
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.id='modal-overlay';
+  overlay.innerHTML=content;
+  overlay.addEventListener('click',(e)=>{if(e.target===overlay){state.modal=null;render();}});
+  document.getElementById('app').appendChild(overlay);
+}
+
+function renderSubmitModal(){
+  return `<div class="glass w-full max-w-lg rounded-2xl p-7 glow slide-in mx-4">
+    <h3 class="text-xl font-bold text-white mb-1">Submit New Idea</h3>
+    <p class="text-sm text-slate-400 mb-6">Our AI will analyze your idea against existing solutions and find relevant research.</p>
+    <div id="submit-form">
+      <div class="mb-4"><label class="block text-xs text-slate-400 uppercase tracking-wider font-medium mb-1.5">Idea Title</label><input id="idea-title" placeholder="Give your idea a clear, concise title" class="input-field w-full px-4 py-3 rounded-xl text-sm"/></div>
+      <div class="mb-5"><label class="block text-xs text-slate-400 uppercase tracking-wider font-medium mb-1.5">Description</label><textarea id="idea-desc" placeholder="Describe your idea in detail — what problem does it solve? How would it work?" rows="4" class="input-field w-full px-4 py-3 rounded-xl text-sm resize-none"></textarea></div>
+      <div id="submit-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"></div>
+      <div class="flex gap-3">
+        <button onclick="state.modal=null;render()" class="btn-secondary flex-1 py-3 rounded-xl text-sm">Cancel</button>
+        <button onclick="submitIdea()" class="btn-primary flex-1 py-3 rounded-xl text-sm">🔍 Analyze Idea</button>
+      </div>
+    </div>
+    <div id="analyzing-state" class="hidden text-center py-4">
+      <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)"><svg class="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+      <h4 class="font-semibold text-white mb-2">Analyzing Your Idea</h4>
+      <p class="text-sm text-slate-400 mb-4" id="analyze-status">Checking existing solutions...</p>
+      <div class="h-2 bg-brand-900/50 rounded-full overflow-hidden"><div class="h-full progress-bar rounded-full"></div></div>
+    </div>
+  </div>`;
+}
+
+function submitIdea(){
+  const title=document.getElementById('idea-title').value.trim();
+  const desc=document.getElementById('idea-desc').value.trim();
+  if(!title||!desc){const err=document.getElementById('submit-error');err.textContent='Please fill in both the title and description.';err.classList.remove('hidden');return;}
+  document.getElementById('submit-form').classList.add('hidden');
+  document.getElementById('analyzing-state').classList.remove('hidden');
+  const steps=['Checking existing solutions...','Searching research databases...','Scanning Google Scholar...','Analyzing novelty...','Generating insights...'];
+  let step=0;
+  const interval=setInterval(()=>{step++;const el=document.getElementById('analyze-status');if(el&&steps[step])el.textContent=steps[step];},600);
+  setTimeout(()=>{
+    clearInterval(interval);
+    const ideas=DB.get('ideas',[]);
+    const isNew=ideas.length%2===0;
+    const newIdea={
+      id:'idea_'+Date.now(),title,description:desc,author:state.user.email,authorName:state.user.name,
+      date:new Date().toISOString().split('T')[0],status:'analyzed',isNew,
+      analysis:isNew?{
+        verdict:'new',summary:'No significant overlap with known existing solutions. This appears to be a genuinely novel concept worth exploring further.',
+        howItWorks:['Define the core problem space and target users clearly','Develop a proof-of-concept prototype focusing on the unique value proposition','Validate with potential users through interviews and surveys','Research and integrate relevant technologies from existing papers','Iterate based on feedback and scale progressively'],
+        papers:[
+          {title:'Innovation in '+title.split(' ').slice(0,3).join(' ')+': A Survey',authors:'Research Collective',year:2024,url:'https://scholar.google.com/scholar?q='+encodeURIComponent(title),source:'Google Scholar'},
+          {title:'Emerging Technology Trends and Novel Applications',authors:'Chen & Williams',year:2024,url:'https://scholar.google.com/scholar?q='+encodeURIComponent(title)+'+novel',source:'arXiv'},
+          {title:'Design Thinking for Breakthrough Innovation',authors:'IDEO Research Lab',year:2023,url:'https://scholar.google.com/scholar?q=design+thinking+innovation',source:'Stanford'},
+        ]
+      }:{
+        verdict:'exists',summary:'Similar concepts to "'+title+'" have been explored in existing products and research. Consider differentiating through a unique angle or niche focus.',
+        existingLinks:[
+          {title:title+' — Wikipedia Overview',url:'https://en.wikipedia.org/wiki/Special:Search/'+encodeURIComponent(title),desc:'General overview and history'},
+          {title:'Related Open Source Projects',url:'https://github.com/search?q='+encodeURIComponent(title.split(' ')[0]),desc:'Browse existing implementations on GitHub'},
+          {title:'Product Hunt Alternatives',url:'https://www.producthunt.com/search?q='+encodeURIComponent(title),desc:'Discover related products'},
+        ],
+        papers:[
+          {title:'The State of '+title.split(' ').slice(0,2).join(' ')+': Literature Review',authors:'Academic Consortium',year:2024,url:'https://scholar.google.com/scholar?q='+encodeURIComponent(title),source:'Google Scholar'},
+          {title:'Comparative Analysis of Similar Systems',authors:'Patel & Rodriguez',year:2023,url:'https://scholar.google.com/scholar?q='+encodeURIComponent(title)+'+comparison',source:'IEEE'},
+        ]
+      }
+    };
+    ideas.push(newIdea);
+    DB.set('ideas',ideas);
+    state.modal=null;state.activeIdea=newIdea.id;state.view='idea';
+    render();
+  },3200);
+}
+
+function renderGroupModal(ideaId){
+  const ideas=DB.get('ideas',[]);
+  return `<div class="glass w-full max-w-md rounded-2xl p-7 glow slide-in mx-4">
+    <h3 class="text-xl font-bold text-white mb-1">Create Collaboration Group</h3>
+    <p class="text-sm text-slate-400 mb-5">A shareable join code is auto-generated so anyone can join via the Collaborate tab.</p>
+    <div class="space-y-4">
+      <div><label class="block text-xs text-slate-400 uppercase tracking-wider font-medium mb-1.5">Group Name</label><input id="grp-name" placeholder="e.g. 🚀 Future Tech Lab" class="input-field w-full px-4 py-3 rounded-xl text-sm"/></div>
+      <div><label class="block text-xs text-slate-400 uppercase tracking-wider font-medium mb-1.5">Description</label><input id="grp-desc" placeholder="What will this group focus on?" class="input-field w-full px-4 py-3 rounded-xl text-sm"/></div>
+      ${ideaId?`<div class="p-3 rounded-lg bg-brand-900/30 border border-brand-800/30 flex items-center gap-2"><svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg><p class="text-xs text-slate-300">Linked idea: <span class="text-brand-300 font-medium">${ideas.find(i=>i.id===ideaId)?.title||''}</span></p></div>`:''}
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="state.modal=null;render()" class="btn-secondary flex-1 py-3 rounded-xl text-sm">Cancel</button>
+      <button onclick="createGroup('${ideaId||''}')" class="btn-primary flex-1 py-3 rounded-xl text-sm">Create Group</button>
+    </div>
+  </div>`;
+}
+
+function createGroup(ideaId){
+  const name=document.getElementById('grp-name').value.trim();
+  const desc=document.getElementById('grp-desc').value.trim();
+  if(!name)return;
+  const joinCode='GRP-'+Math.random().toString(36).substr(2,6).toUpperCase();
+  const groups=DB.get('groups',[]);
+  const newGroup={
+    id:'grp_'+Date.now(),name,description:desc||'No description',
+    members:[state.user.email],memberNames:{[state.user.email]:state.user.name},
+    ideas:ideaId?[ideaId]:[],joinCode,
+    messages:[{id:'m'+Date.now(),author:'system',name:'IdeaVault',text:'Welcome to "'+name+'"! 🎉 Share the join code 🔑 '+joinCode+' — others can join via the Collaborate tab on the login page.',time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),date:'Today'}]
+  };
+  groups.push(newGroup);
+  DB.set('groups',groups);
+  state.modal=null;
+  viewGroup(newGroup.id);
+}
+
+function renderAddMemberModal(groupId){
+  const groups=DB.get('groups',[]);
+  const group=groups.find(g=>g.id===groupId);
+  return `<div class="glass w-full max-w-sm rounded-2xl p-6 glow slide-in mx-4">
+    <h3 class="text-lg font-bold text-white mb-1">Add Member</h3>
+    <p class="text-sm text-slate-400 mb-3">Share the group join code with anyone to invite them:</p>
+    ${group.joinCode?`<div class="p-3 rounded-xl mb-4 flex items-center justify-between" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3)">
+      <span class="font-mono font-bold text-emerald-300 text-lg tracking-widest">${group.joinCode}</span>
+      <button onclick="navigator.clipboard.writeText('${group.joinCode}').then(()=>{this.textContent='✅ Copied!';setTimeout(()=>this.textContent='📋 Copy',2000)})" class="btn-secondary text-xs px-3 py-1.5 rounded-lg">📋 Copy</button>
+    </div>
+    <p class="text-xs text-slate-500 mb-1">They can use this code in the <strong class="text-brand-400">Collaborate → Join Group</strong> tab on the login page.</p>
+    <div class="border-t border-brand-800/20 my-4"></div>`:''}
+    <p class="text-xs text-slate-500 mb-3">Or add a registered user directly by email:</p>
+    <input id="member-email" type="email" placeholder="member@example.com" class="input-field w-full px-4 py-3 rounded-xl text-sm mb-3"/>
+    <div id="member-error" class="hidden mb-3 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs"></div>
+    <div class="flex gap-3">
+      <button onclick="state.modal=null;render()" class="btn-secondary flex-1 py-2.5 rounded-xl text-sm">Close</button>
+      <button onclick="addMember('${groupId}')" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Add by Email</button>
+    </div>
+  </div>`;
+}
+
+function addMember(groupId){
+  const email=document.getElementById('member-email').value.trim().toLowerCase();
+  const codes=DB.get('codes',[]);
+  if(!codes.find(c=>c.email.toLowerCase()===email)){
+    document.getElementById('member-error').textContent='This email is not registered on IdeaVault.';
+    document.getElementById('member-error').classList.remove('hidden');
+    return;
+  }
+  const groups=DB.get('groups',[]);
+  const group=groups.find(g=>g.id===groupId);
+  if(!group.members.includes(email)){
+    group.members.push(email);
+    group.messages.push({id:'m'+Date.now(),author:'system',name:'IdeaVault',text:email+' has joined the group!',time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),date:'Today'});
+    DB.set('groups',groups);
+  }
+  state.modal=null;
+  viewGroup(groupId);
+}
+
+function renderShareModal(email,code){
+  return `<div class="glass w-full max-w-md rounded-2xl p-7 glow slide-in mx-4">
+    <div class="text-center mb-5"><div class="text-5xl mb-3">🔑</div><h3 class="text-xl font-bold text-white">Share Invite Code</h3><p class="text-sm text-slate-400 mt-1">For ${email}</p></div>
+    <div class="glass-dark rounded-xl p-4 mb-5">
+      <div class="space-y-2 mb-3">
+        <div class="flex justify-between items-center"><span class="text-xs text-slate-400">Email:</span><span class="text-sm text-white font-medium">${email}</span></div>
+        <div class="flex justify-between items-center"><span class="text-xs text-slate-400">Code:</span><span class="font-mono font-bold text-brand-300 text-sm tracking-widest">${code}</span></div>
+      </div>
+      <div class="p-3 rounded-lg bg-brand-900/30 border border-brand-800/30 text-xs text-slate-400">Sign in at IdeaVault · Email: <strong class="text-slate-300">${email}</strong> · Code: <strong class="text-brand-300">${code}</strong></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="navigator.clipboard.writeText('IdeaVault Invite\\nEmail: ${email}\\nCode: ${code}').then(()=>{this.textContent='✅ Copied!';setTimeout(()=>this.textContent='📋 Copy Details',2000)})" class="btn-secondary flex-1 py-3 rounded-xl text-sm">📋 Copy Details</button>
+      <button onclick="state.modal=null;render()" class="btn-primary flex-1 py-3 rounded-xl text-sm">Done</button>
+    </div>
+  </div>`;
+}
+
+// ─── ADMIN ACTIONS ─────────────────────────────────────────────────────────────
+function generateCode(){
+  const adj=['ALPHA','BETA','GAMMA','DELTA','SIGMA','THETA','OMEGA','PRIME'];
+  const num=Math.floor(1000+Math.random()*9000);
+  const word=adj[Math.floor(Math.random()*adj.length)];
+  const code='VAULT-'+num+'-'+word;
+  const email=prompt('Enter the email address for this invite code:');
+  if(!email||!email.includes('@'))return;
+  const codes=DB.get('codes',[]);
+  codes.push({code,email:email.toLowerCase(),used:false,role:'user'});
+  DB.set('codes',codes);
+  render();
+}
+
+function showCodeShare(email,code){state.modal={type:'share',email,code};render();}
+
+function revokeCode(code){
+  if(!confirm('Revoke code '+code+'? This user will lose access.'))return;
+  const codes=DB.get('codes',[]).filter(c=>c.code!==code);
+  DB.set('codes',codes);
+  render();
+}
+
+function doLogout(){
+  DB.clear('user');
+  state.user=null;state.view='login';state.loginTab='signin';state.collabMode=null;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
